@@ -1,0 +1,225 @@
+<% layout('layouts/boilerplate') %>
+
+<style>
+  /* Search Bar Styling */
+  .search-input {
+    border-radius: 9999px;
+    padding: 0.5rem 1.2rem;
+    border: 2px solid #ccc;
+    transition: all 0.3s ease;
+    outline: none;
+    width: 250px;
+  }
+
+  .search-input:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  }
+
+  .search-btn {
+    background-color: #ff385c;
+    color: white;
+    border-radius: 9999px;
+    padding: 0.5rem 1.2rem;
+    border: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+
+  .search-btn:hover {
+    background-color: #e03150;
+  }
+
+  .search-btn i {
+    margin-right: 5px;
+  }
+
+  #filters {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter {
+    text-align: center;
+    margin-right: 2rem;
+    opacity: 0.7;
+  }
+
+  .filter:hover {
+    opacity: 1;
+    cursor: pointer;
+  }
+
+  .filter p {
+    font-size: 0.8rem;
+  }
+
+  .tax-info {
+    display: none;
+  }
+
+  .tax-toggle {
+    border: 1px solid #ccc;
+    border-radius: 2rem;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-left: auto;
+    margin-top: 1rem;
+    white-space: nowrap;
+    font-family: sans-serif;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 24px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 24px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+
+  .switch input:checked + .slider {
+    background-color: #0d6efd;
+  }
+
+  .switch input:checked + .slider:before {
+    transform: translateX(16px);
+  }
+
+  .toggle-label {
+    font-size: 1rem;
+  }
+</style>
+
+<!-- Filter Bar -->
+<div id="filters">
+  <div class="filter"><div><i class="fa-solid fa-fire"></i></div><p>Trending</p></div>
+  <div class="filter"><div><i class="fa-solid fa-bed"></i></div><p>Rooms</p></div>
+  <div class="filter"><div><i class="fa-solid fa-mountain-city"></i></div><p>Iconic Cities</p></div>
+  <div class="filter"><div><i class="fa-solid fa-mountain"></i></div><p>Mountains</p></div>
+  <div class="filter"><div><i class="fa-brands fa-fort-awesome"></i></div><p>Castels</p></div>
+  <div class="filter"><div><i class="fa-regular fa-snowflake"></i></div><p>Arctic</p></div>
+  <div class="filter"><div><i class="fa-solid fa-campground"></i></div><p>Camping</p></div>
+  <div class="filter"><div><i class="fa-solid fa-cow"></i></div><p>Farms</p></div>
+  <div class="filter"><div><i class="fa-solid fa-person-swimming"></i></div><p>Amazing Pools</p></div>
+  <div class="filter"><div><i class="fa-solid fa-igloo"></i></div><p>Domes</p></div>
+  <div class="filter"><div><i class="fa-solid fa-ship"></i></div><p>Boats</p></div>
+
+  <div class="tax-toggle">
+    <label class="switch">
+      <input type="checkbox" id="flexSwitchCheckDefault">
+      <span class="slider round"></span>
+    </label>
+    <span class="toggle-label">Display Total After Taxes</span>
+  </div>
+</div>
+
+<!-- Listings -->
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4 mt-3">
+  <% for (let listing of allListings) { %>
+    <div class="col">
+      <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
+        <div class="card h-100 listing-card"
+             data-title="<%= listing.title.toLowerCase() %>"
+             data-location="<%= listing.location.toLowerCase() %>">
+          <img
+            src="<%= listing.image.url %>"
+            class="card-img-top"
+            alt="listing_image"
+            style="height: 20rem; object-fit: cover;"
+          />
+          <div class="card-body">
+            <p class="card-text">
+              <b><%= listing.title %></b><br />
+              ₹ <%= listing.price.toLocaleString("en-IN") %> / night
+              <i class="tax-info"> &nbsp; +18% GST</i>
+            </p>
+          </div>
+        </div>
+      </a>
+    </div>
+  <% } %>
+</div>
+
+<!-- Tax Toggle Script -->
+<script>
+  const taxSwitch = document.getElementById("flexSwitchCheckDefault");
+  taxSwitch.addEventListener("change", () => {
+    document.querySelectorAll(".listing-card").forEach(card => {
+      let priceTag = card.querySelector(".card-text");
+      let priceText = priceTag.innerHTML;
+      const match = priceText.match(/₹\s?([\d,]+)/);
+      if (!match) return;
+
+      let basePrice = parseInt(match[1].replace(/,/g, ""));
+      let gst = Math.round(basePrice * 0.18);
+      let total = basePrice + gst;
+
+      if (taxSwitch.checked) {
+        priceTag.innerHTML = priceText.replace(/₹\s?[\d,]+/, `₹ ${total.toLocaleString("en-IN")}`);
+        card.querySelector(".tax-info").style.display = "inline";
+      } else {
+        priceTag.innerHTML = priceText.replace(/₹\s?[\d,]+/, `₹ ${basePrice.toLocaleString("en-IN")}`);
+        card.querySelector(".tax-info").style.display = "none";
+      }
+    });
+  });
+</script>
+
+<!-- Live Search Filter Script -->
+<script>
+  const searchInput = document.getElementById("searchInput");
+  const cards = document.querySelectorAll(".listing-card");
+
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.toLowerCase().trim();
+    cards.forEach(card => {
+      const title = card.dataset.title;
+      const location = card.dataset.location;
+      const isVisible = title.includes(query) || location.includes(query);
+      card.closest(".col").style.display = isVisible ? "block" : "none";
+    });
+  });
+</script>
+
+
+
+
+
+
+    
+    
+
+
