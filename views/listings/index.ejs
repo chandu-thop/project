@@ -174,6 +174,9 @@
 </div>
 
 <!-- Tax Toggle Script -->
+<!-- Tax Toggle Script -->
+
+
 <script>
   const taxSwitch = document.getElementById("flexSwitchCheckDefault");
   taxSwitch.addEventListener("change", () => {
@@ -181,7 +184,8 @@
       let priceTag = card.querySelector(".card-text");
       let priceText = priceTag.innerHTML;
       const match = priceText.match(/₹\s?([\d,]+)/);
-      if (!match) return;
+
+      if (!match || !match[1]) return; // ✅ Prevent crash
 
       let basePrice = parseInt(match[1].replace(/,/g, ""));
       let gst = Math.round(basePrice * 0.18);
@@ -197,6 +201,7 @@
     });
   });
 </script>
+
 
 <!-- Live Search Filter Script -->
 <script>

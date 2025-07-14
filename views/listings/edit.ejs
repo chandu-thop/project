@@ -18,7 +18,12 @@
         </div>
         <div class="mb-3">
             Orginal List Image<br/>
-           <img src="<%= originalImageUrl %>" class="img-fluid mb-3" alt="Listing image" />
+           <% if (listing.image && listing.image.url) { %>
+  <img src="<%= listing.image.url.replace('/upload', '/upload/w_300') %>" class="img-fluid mb-3" alt="Listing image" />
+<% } else { %>
+  <p>No image available</p>
+<% } %>
+
         </div>
         <div class="mb-3">
             <label for="title" class="form-label">Upload New Image</label>
